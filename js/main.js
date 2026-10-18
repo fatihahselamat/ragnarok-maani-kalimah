@@ -730,7 +730,7 @@ const doInstall = async () => {
 };
 $('#btnInstall').onclick = doInstall;
 $('#mInstall').onclick = doInstall;
-const ios = /iphone|ipad|ipod/i.test(navigator.userAgent) && !navigator.standalone;
+const ios = (/iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) && !navigator.standalone;
 if (ios) $('#iosNote').hidden = false;
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('./sw.js').catch(() => {});

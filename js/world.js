@@ -145,7 +145,9 @@ export function createWorld(scene) {
   const houseSpots = [[-14, -12], [14, -14], [-16, 12], [16, 13], [0, -20]];
   houseSpots.forEach(([x, z], i) => {
     const g = new THREE.Group();
-    g.add(Object.assign(new THREE.Mesh(new THREE.BoxGeometry(5, 3.2, 5), mat(['#f3e6c8', '#f7d9c4', '#dfeaf7'][i % 3])), { position: new THREE.Vector3(0, 1.6, 0) }));
+    const walls = new THREE.Mesh(new THREE.BoxGeometry(5, 3.2, 5), mat(['#f3e6c8', '#f7d9c4', '#dfeaf7'][i % 3]));
+    walls.position.y = 1.6;
+    g.add(walls);
     const roof = new THREE.Mesh(new THREE.ConeGeometry(4.4, 2.4, 4), mat(['#c85a4a', '#4a7ac8', '#5ab07a'][i % 3]));
     roof.position.y = 4.4; roof.rotation.y = Math.PI / 4;
     g.add(roof);
