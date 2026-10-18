@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<title>Pengembaraan Maani Kalimah</title>
+<meta name="description" content="RPG 3D multiplayer untuk belajar Maani Kalimah Tafsir Tingkatan 4">
+<meta name="theme-color" content="#1e3a8a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Maani Kalimah">
+<link rel="stylesheet" href="css/style.css">
+<script type="importmap">{"imports":{"three":"./vendor/three/three.module.js"}}</script>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<!-- LOG MASUK -->
+<section id="login" class="screen">
+  <div class="card">
+    <div class="logo ar">معاني الكلمات</div>
+    <h1>Pengembaraan Maani Kalimah</h1>
+    <p class="sub">Tafsir Tingkatan 4 · Mulakan sebagai Novice</p>
+    <label for="user">Nama pengguna atau emel</label>
+    <input id="user" type="text" maxlength="40" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="cth: ahmad@sekolah.edu.my">
+    <button id="btnLogin" class="primary">Masuk / Mula</button>
+    <div class="row">
+      <button id="btnImport" class="link">Muat fail progress</button>
+      <button id="btnInstall" class="link" hidden>Pasang aplikasi</button>
+    </div>
+    <p class="note">Progress disimpan dalam peranti ini sahaja. Guna menu → Simpan ke fail untuk sandaran.</p>
+    <input id="fileIn" type="file" accept=".json,application/json" hidden>
+  </div>
+</section>
+
+<!-- CIPTA WATAK -->
+<section id="creator" class="screen" hidden>
+  <div class="panel side">
+    <h2>Cipta Watak</h2>
+    <label for="cName">Nama dalam game</label>
+    <input id="cName" type="text" maxlength="16" autocomplete="off">
+    <label>Gaya</label>
+    <div class="seg" id="cSex"><button data-v="f">Perempuan</button><button data-v="m">Lelaki</button></div>
+    <div id="cHijabRow"><label>Tudung</label>
+      <div class="seg" id="cHijab"><button data-v="1">Bertudung</button><button data-v="0">Berambut</button></div></div>
+    <label>Warna kulit</label>
+    <div class="swatches" id="cSkin"></div>
+    <label id="cHairLabel">Warna rambut</label>
+    <div class="swatches" id="cHair"></div>
+    <button id="btnCreate" class="primary">Mula Mengembara</button>
+  </div>
+</section>
+
+<!-- HUD -->
+<div id="hud" hidden>
+  <div class="stats">
+    <div class="who"><b id="hName">-</b> <span id="hCls">Novice</span> <span id="hLv">Lv 1</span></div>
+    <div class="bar hp"><i id="hpBar"></i><span id="hpTxt"></span></div>
+    <div class="bar xp"><i id="xpBar"></i><span id="xpTxt"></span></div>
+  </div>
+  <div class="topright">
+    <div id="netStat" class="chip">Solo</div>
+    <button id="btnRotL" class="round" aria-label="Putar kiri">⟲</button>
+    <button id="btnRotR" class="round" aria-label="Putar kanan">⟳</button>
+    <button id="btnBook" class="round" aria-label="Buku Kalimah">📖</button>
+    <button id="btnMenu" class="round" aria-label="Menu">☰</button>
+  </div>
+  <div id="zoneBar" class="zonebar"></div>
+  <div id="stick"><div id="knob"></div></div>
+  <button id="btnAct" class="act" hidden>Bercakap</button>
+  <div id="hint" class="hint">Klik / sentuh tanah untuk berjalan · WASD atau joystick · langgar Jeli untuk bertarung</div>
+</div>
+
+<!-- BATTLE -->
+<section id="battle" class="overlay" hidden>
+  <div class="card battle">
+    <div id="bHint" class="hintline"></div>
+    <div id="bPrompt" class="prompt ar"></div>
+    <div id="bOpts" class="opts"></div>
+    <div id="bFeed" class="feed"></div>
+  </div>
+</section>
+
+<!-- DIALOG -->
+<section id="dialog" class="overlay" hidden>
+  <div class="card">
+    <h2 id="dTitle"></h2>
+    <div id="dBody" class="body"></div>
+    <button id="dClose" class="primary">Tutup</button>
+  </div>
+</section>
+
+<!-- MENU -->
+<section id="menu" class="overlay" hidden>
+  <div class="card">
+    <h2>Menu</h2>
+    <div class="menulist">
+      <button id="mBook">📖 Buku Kalimah</button>
+      <button id="mLook">🎨 Ubah penampilan</button>
+      <button id="mJob">⚔️ Tukar job</button>
+      <button id="mMute">🔊 Bunyi: hidup</button>
+      <button id="mExport">💾 Simpan ke fail</button>
+      <button id="mInstall" hidden>📲 Pasang aplikasi</button>
+      <button id="mLogout">🚪 Log keluar</button>
+    </div>
+    <p class="note" id="iosNote" hidden>iPhone/iPad: tekan butang Kongsi, kemudian "Tambah ke Skrin Utama".</p>
+    <button id="mClose" class="primary">Tutup</button>
+  </div>
+</section>
+
+<!-- BUKU KALIMAH -->
+<section id="book" class="overlay" hidden>
+  <div class="card wide">
+    <h2>Buku Kalimah</h2>
+    <div id="bookBody" class="body scroll"></div>
+    <button id="bookClose" class="primary">Tutup</button>
+  </div>
+</section>
+
+<!-- TUKAR JOB -->
+<section id="job" class="overlay" hidden>
+  <div class="card wide">
+    <h2>Pilih Job</h2>
+    <p class="sub">Anda mencapai Lv 5. Pilih jalan anda.</p>
+    <div id="jobList" class="joblist"></div>
+    <button id="jobClose" class="link">Nanti</button>
+  </div>
+</section>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
