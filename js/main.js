@@ -152,10 +152,11 @@ function refreshLabel() {
 
 // ---------- Monster & NPC ----------
 const monsters = [];
-function spawnMonster(zi) {
-  const w = pickWord(zi, P ? P.words : {});
+function spawnMonster(zi, home = ZP[zi], wz = zi) {
+  const w = pickWord(wz, P ? P.words : {});
   if (!w) return;
-  const m = new Monster(w, zi, ZP[zi], ZONES[zi].jeli);
+  const m = new Monster(w, zi, home, ZONES[wz].jeli);
+  m.wordZone = wz;
   scene.add(m.group);
   monsters.push(m);
 }
@@ -164,6 +165,8 @@ ZONES.forEach((z, i) => {
   const n = Math.min(7, Math.max(4, zoneWords(i).length));
   for (let k = 0; k < n; k++) spawnMonster(i);
 });
+// Jeli latihan di kampung (kalimah zon 1) supaya soalan pertama mudah dijumpai.
+for (let k = 0; k < 3; k++) spawnMonster(0, { x: 0, z: 0, r: 9 }, 1);
 
 const GUIDE_LOOK = { sex: 'f', skin: 1, hair: 1, hijab: true };
 const npcs = [];
@@ -171,7 +174,7 @@ function addNpc(o) { const n = makeNpc(o); scene.add(n.group); npcs.push(n); ret
 addNpc({
   name: 'Ustazah Maani', x: 4, z: 3, look: GUIDE_LOOK, cls: 'priest', title: 'Selamat datang, Novice',
   html: () => `<p>Di sini bermulanya pengembaraan Maani Kalimah Tafsir Tingkatan 4.</p>
-  <p>• Berjalan ke timur untuk memasuki <b>Lembah Takwir</b>.<br>• Langgar <b>Jeli</b>. Setiap Jeli membawa satu kalimah, pilih maknanya.<br>• Jawab betul untuk XP. Jawab salah akan kurangkan HP.<br>• Satu kalimah dikuasai selepas 2 jawapan betul. Kuasai 70% kalimah satu zon untuk buka gerbang zon seterusnya.<br>• Capai <b>Lv ${JOB_LV}</b> untuk memilih job: Priest, Knight, Assassin, Mage, Hunter atau Blacksmith.</p>`,
+  <p>• Berjalan ke timur untuk memasuki <b>Lembah Takwir</b>.<br>• Soalan muncul bila anda melanggar <b>Jeli</b> (makhluk jeli berwarna dengan perkataan Arab di atasnya). Ada 3 Jeli latihan di kampung ini. Ikut anak panah kuning di bawah skrin.<br>• Jawab betul untuk XP. Jawab salah akan kurangkan HP.<br>• Satu kalimah dikuasai selepas 2 jawapan betul. Kuasai 70% kalimah satu zon untuk buka gerbang zon seterusnya.<br>• Capai <b>Lv ${JOB_LV}</b> untuk memilih job: Priest, Knight, Assassin, Mage, Hunter atau Blacksmith.</p>`,
 });
 ZONES.forEach((z, i) => {
   if (z.town) return;
@@ -396,8 +399,8 @@ function endBattle(ok) {
   if (!b) return;
   if (ok) {
     b.m.defeat();
-    const zi = b.m.zone;
-    setTimeout(() => spawnMonster(zi), 5000);
+    const { zone: zi, home: hm, wordZone: wz } = b.m;
+    setTimeout(() => spawnMonster(zi, hm, wz), 5000);
   } else {
     b.m.cool = 3;
     const dx = player.x - b.m.group.position.x, dz = player.z - b.m.group.position.z, d = Math.hypot(dx, dz) || 1;
@@ -671,6 +674,21 @@ function updatePlay(dt) {
   let nd = 3.4;
   for (const n of npcs) { const d = Math.hypot(n.pos.x - player.x, n.pos.z - player.z); if (d < nd) { nd = d; nearNpc = n; } }
   $('#btnAct').hidden = !nearNpc || !!battle || uiOpen();
+
+  // penunjuk arah ke Jeli terdekat
+  let best = null, bd = 1e9;
+  for (const m of monsters) {
+    if (m.dead || !isUnlocked(m.zone)) continue;
+    const d = Math.hypot(m.group.position.x - player.x, m.group.position.z - player.z);
+    if (d < bd) { bd = d; best = m; }
+  }
+  if (best && bd > 3 && !battle && !uiOpen()) {
+    const dx = best.group.position.x - player.x, dz = best.group.position.z - player.z;
+    const xs = dx * Math.cos(yaw) - dz * Math.sin(yaw), ys = -dx * Math.sin(yaw) - dz * Math.cos(yaw);
+    $('#cArrow').style.transform = `rotate(${Math.atan2(xs, ys)}rad)`;
+    $('#cTxt').textContent = `Jeli terdekat ${Math.round(bd)} m · langgar untuk soalan`;
+    $('#compass').hidden = false;
+  } else $('#compass').hidden = true;
 
   setZone(zoneAt(player.x, player.z));
   netTick(dt);

@@ -53,6 +53,9 @@ button.link{background:none;color:var(--blue);text-decoration:underline;padding:
 .zonebar{position:absolute;top:64px;left:50%;transform:translateX(-50%);background:rgba(30,40,90,.82);color:#fff;border-radius:999px;padding:6px 14px;font-size:13px;font-weight:600;max-width:90vw;text-align:center;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:520px){.zonebar{top:84px}.topright{flex-wrap:wrap;justify-content:flex-end;max-width:56vw}}
 .hint{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);font-size:12px;background:rgba(255,253,246,.8);border-radius:999px;padding:5px 12px;pointer-events:none;max-width:92vw;text-align:center;transition:opacity 1s}
+.compass{position:absolute;bottom:calc(46px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);background:rgba(30,40,90,.85);color:#fff;border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600;pointer-events:none;white-space:nowrap;max-width:94vw;overflow:hidden;text-overflow:ellipsis}
+#cArrow{display:inline-block;color:#ffd23f;font-size:16px;transition:transform .1s}
+@media (pointer:coarse){.compass{bottom:calc(14px + env(safe-area-inset-bottom));font-size:12px;max-width:52vw}}
 .act{position:absolute;right:20px;bottom:calc(30px + env(safe-area-inset-bottom));padding:16px 22px;border-radius:999px;background:var(--gold);color:#4a3300;font-weight:800;font-size:16px;box-shadow:0 6px 14px rgba(0,0,0,.25)}
 #stick{position:absolute;left:22px;bottom:calc(30px + env(safe-area-inset-bottom));width:130px;height:130px;border-radius:50%;background:rgba(255,255,255,.35);border:3px solid rgba(255,255,255,.7);display:none;touch-action:none}
 #knob{position:absolute;left:50%;top:50%;width:54px;height:54px;margin:-27px 0 0 -27px;border-radius:50%;background:rgba(47,95,191,.85);border:3px solid #fff}

@@ -40,7 +40,7 @@ export class Monster {
     this.label = makeLabel(word.ar, { px: 46, scale: 0.0105, bg: 'rgba(25,35,80,0.75)' });
     this.label.position.y = 2.2;
     this.group.add(this.label);
-    const r = 6 + Math.random() * 20, a = Math.random() * Math.PI * 2;
+    const r = 4 + Math.random() * (home.r || 22), a = Math.random() * Math.PI * 2;
     this.group.position.set(home.x + Math.cos(a) * r, 0, home.z + Math.sin(a) * r);
     this.group.userData.entity = this;
   }
@@ -70,7 +70,7 @@ export class Monster {
     } else {
       this.wait -= dt;
       if (this.wait <= 0) {
-        const r = 4 + Math.random() * 22, a = Math.random() * Math.PI * 2;
+        const r = 4 + Math.random() * (this.home.r || 22), a = Math.random() * Math.PI * 2;
         this.target = { x: this.home.x + Math.cos(a) * r, z: this.home.z + Math.sin(a) * r };
       }
     }

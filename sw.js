@@ -1,6 +1,6 @@
 // Service worker: cache-first untuk semua fail statik, supaya game boleh dibuka tanpa internet.
 // Senarai fail dijana oleh tools/stamp.py (jalankan semula setiap kali fail berubah).
-const VERSION = 'maani-e9143cd5c6';
+const VERSION = 'maani-dc413f43fa';
 const FILES = ["./", "./index.html", "./manifest.webmanifest", "./css/style.css", "./fonts/amiri-arabic-400-normal.woff2", "./fonts/amiri-arabic-700-normal.woff2", "./icons/icon-192.png", "./icons/icon-512.png", "./icons/icon-maskable-512.png", "./js/character.js", "./js/config.js", "./js/data.js", "./js/entities.js", "./js/main.js", "./js/net.js", "./js/quiz.js", "./js/world.js", "./vendor/supabase.js", "./vendor/three/three.core.js", "./vendor/three/three.module.js"];
 
 self.addEventListener('install', (e) => {
