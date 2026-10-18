@@ -82,6 +82,12 @@ button.link{background:none;color:var(--blue);text-decoration:underline;padding:
 .wrow .ar{font-size:22px;font-weight:700;color:var(--blue);min-width:110px;text-align:right}
 .wrow .m{flex:1;font-size:16px;text-align:right}
 .stars{font-size:14px;white-space:nowrap}
+#mapSvg{width:100%;height:auto;display:block;background:linear-gradient(#e6f4ff,#f6f1dc);border-radius:12px;touch-action:manipulation}
+#mapSvg text{pointer-events:none;user-select:none;fill:#1d2540}
+#mapSvg .ar{font-family:Amiri,'Noto Naskh Arabic',serif;direction:rtl}
+#mapSvg [data-z]{cursor:pointer}
+#mapInfo{margin-top:8px}
+#mapInfo h3{margin:4px 0}
 .menulist{display:grid;gap:8px}
 .menulist button{padding:13px;border-radius:12px;background:#f3ecd6;border:2px solid var(--line);font-size:16px;text-align:left}
 .joblist{display:grid;gap:8px;margin:8px 0}

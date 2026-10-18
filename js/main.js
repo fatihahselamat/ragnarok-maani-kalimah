@@ -111,7 +111,8 @@ function toast(msg, ms = 2200) {
   clearTimeout(toastT);
   toastT = setTimeout(() => (el.hidden = true), ms);
 }
-const uiOpen = () => ['#dialog', '#menu', '#book', '#job'].some((s) => !$(s).hidden);
+const UI_PANELS = ['#dialog', '#menu', '#book', '#job', '#map'];
+const uiOpen = () => UI_PANELS.some((s) => !$(s).hidden);
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
 function hud() {
@@ -174,7 +175,7 @@ function addNpc(o) { const n = makeNpc(o); scene.add(n.group); npcs.push(n); ret
 addNpc({
   name: 'Ustazah Maani', x: 4, z: 3, look: GUIDE_LOOK, cls: 'priest', title: 'Selamat datang, Novice',
   html: () => `<p>Di sini bermulanya pengembaraan Maani Kalimah Tafsir Tingkatan 4.</p>
-  <p>• Berjalan ke timur untuk memasuki <b>Lembah Takwir</b>.<br>• Soalan muncul bila anda melanggar <b>Jeli</b> (makhluk jeli berwarna dengan perkataan Arab di atasnya). Ada 3 Jeli latihan di kampung ini. Ikut anak panah kuning di bawah skrin.<br>• Jawab betul untuk XP. Jawab salah akan kurangkan HP.<br>• Satu kalimah dikuasai selepas 2 jawapan betul. Kuasai 70% kalimah satu zon untuk buka gerbang zon seterusnya.<br>• Capai <b>Lv ${JOB_LV}</b> untuk memilih job: Priest, Knight, Assassin, Mage, Hunter atau Blacksmith.</p>`,
+  <p>• Berjalan ke timur untuk memasuki <b>Lembah Takwir</b>.<br>• Soalan muncul bila anda melanggar <b>Jeli</b> (makhluk jeli berwarna dengan perkataan Arab di atasnya). Ada 3 Jeli latihan di kampung ini. Ikut anak panah kuning di bawah skrin.<br>• Tekan butang peta 🗺️ (atau kekunci M) untuk pergi terus ke kampung yang sudah dibuka.<br>• Jawab betul untuk XP. Jawab salah akan kurangkan HP.<br>• Satu kalimah dikuasai selepas 2 jawapan betul. Kuasai 70% kalimah satu zon untuk buka gerbang zon seterusnya.<br>• Capai <b>Lv ${JOB_LV}</b> untuk memilih job: Priest, Knight, Assassin, Mage, Hunter atau Blacksmith.</p>`,
 });
 ZONES.forEach((z, i) => {
   if (z.town) return;
@@ -242,6 +243,7 @@ addEventListener('keydown', (e) => {
   if (e.target && e.target.tagName === 'INPUT') return;
   keys[e.key.toLowerCase()] = true;
   if (state === 'play' && (e.key === 'e' || e.key === 'Enter' || e.key === ' ') && !uiOpen() && !battle) { e.preventDefault(); doAction(); }
+  if ((e.key === 'm' || e.key === 'M') && state === 'play' && !battle) { if ($('#map').hidden) openMap(); else $('#map').hidden = true; }
   if (e.key === 'Escape' && state === 'play') { if (uiOpen()) closeAllUI(); else openMenu(); }
 });
 addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
@@ -434,7 +436,68 @@ function addXp(n) {
 }
 
 // ---------- Menu, buku, job ----------
-function closeAllUI() { ['#dialog', '#menu', '#book', '#job'].forEach((s) => ($(s).hidden = true)); }
+function closeAllUI() { UI_PANELS.forEach((s) => ($(s).hidden = true)); }
+
+// ---------- Peta & perjalanan pantas ----------
+const MAP_POS = [[60, 80], [160, 80], [260, 80], [360, 80], [360, 210], [260, 210], [160, 210], [60, 210]];
+let mapSel = 0;
+const gateNeed = (i) => (i >= 2 ? Math.ceil(zoneWords(i - 1).length * UNLOCK_AT) : 0);
+function openMap() {
+  if (battle || state !== 'play') return;
+  closeAllUI();
+  mapSel = curZone >= 0 ? curZone : 0;
+  renderMap();
+  $('#map').hidden = false;
+}
+function renderMap() {
+  let s = '';
+  for (let i = 1; i < ZONES.length; i++) {
+    const [x1, y1] = MAP_POS[i - 1], [x2, y2] = MAP_POS[i];
+    s += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${isUnlocked(i) ? '#c9a95e' : '#b5b5b5'}" stroke-width="6" stroke-linecap="round" ${isUnlocked(i) ? '' : 'stroke-dasharray="2 10"'}/>`;
+  }
+  ZONES.forEach((z, i) => {
+    const [x, y] = MAP_POS[i];
+    const open = isUnlocked(i), sel = i === mapSel;
+    const ws = zoneWords(i), done = ws.filter(mastered).length;
+    s += `<g data-z="${i}"><rect x="${x - 34}" y="${y - 34}" width="68" height="104" fill="transparent"/>`;
+    s += `<circle cx="${x}" cy="${y}" r="26" fill="${open ? z.color : '#d4d4d4'}" stroke="${sel ? '#2f5fbf' : '#fff'}" stroke-width="${sel ? 5 : 3}"/>`;
+    s += `<text x="${x}" y="${y + 8}" text-anchor="middle" font-size="22" font-weight="700">${i === 0 ? '🏠' : i}</text>`;
+    if (!open) s += `<text x="${x + 20}" y="${y - 16}" font-size="16">🔒</text>`;
+    s += `<text class="ar" x="${x}" y="${y + 46}" text-anchor="middle" font-size="13" font-weight="700">${esc(z.ar)}</text>`;
+    if (i > 0) s += `<text x="${x}" y="${y + 62}" text-anchor="middle" font-size="11">${done}/${ws.length}</text>`;
+    if (i === curZone) s += `<text x="${x}" y="${y - 32}" text-anchor="middle" font-size="20">📍</text>`;
+    s += '</g>';
+  });
+  $('#mapSvg').innerHTML = s;
+  renderMapInfo();
+}
+function renderMapInfo() {
+  const z = ZONES[mapSel], open = isUnlocked(mapSel), here = mapSel === curZone;
+  let h = `<h3>${esc(z.name)}</h3>`;
+  if (mapSel > 0) { const ws = zoneWords(mapSel); h += `<p style="margin:2px 0">Kalimah dikuasai: <b>${ws.filter(mastered).length}/${ws.length}</b></p>`; }
+  if (!open) h += `<p>🔒 Kuasai ${gateNeed(mapSel)} kalimah di ${esc(ZONES[mapSel - 1].name)} untuk membuka zon ini.</p>`;
+  else h += `<button class="primary" id="mapGo"${here ? ' disabled' : ''}>${here ? 'Anda berada di sini' : 'Pergi ke sini'}</button>`;
+  $('#mapInfo').innerHTML = h;
+  const go = $('#mapGo');
+  if (go) go.onclick = () => travel(mapSel);
+}
+function travel(i) {
+  if (battle || !isUnlocked(i)) return;
+  if (i === 0) { player.x = 0; player.z = 6; }
+  else { player.x = ZP[i].x - 4; player.z = ZP[i].z + 4; }
+  target = null; chase = null; pendingTalk = null; marker.visible = false;
+  const cp = Math.cos(PITCH);
+  camPos.set(player.x + Math.sin(yaw) * cp * dist, 1.3 + Math.sin(PITCH) * dist, player.z + Math.cos(yaw) * cp * dist);
+  $('#map').hidden = true;
+  toast(`Tiba di ${ZONES[i].name}`, 1800);
+  save();
+}
+$('#mapSvg').addEventListener('click', (e) => {
+  const g = e.target.closest('[data-z]');
+  if (g) { mapSel = +g.dataset.z; renderMap(); }
+});
+$('#btnMap').onclick = openMap;
+$('#mapClose').onclick = () => ($('#map').hidden = true);
 function openMenu() {
   $('#mJob').hidden = P.lv < JOB_LV;
   $('#mMute').textContent = muted ? '🔇 Bunyi: senyap' : '🔊 Bunyi: hidup';

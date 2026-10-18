@@ -65,6 +65,7 @@
     <div id="netStat" class="chip">Solo</div>
     <button id="btnRotL" class="round" aria-label="Putar kiri">⟲</button>
     <button id="btnRotR" class="round" aria-label="Putar kanan">⟳</button>
+    <button id="btnMap" class="round" aria-label="Peta">🗺️</button>
     <button id="btnBook" class="round" aria-label="Buku Kalimah">📖</button>
     <button id="btnMenu" class="round" aria-label="Menu">☰</button>
   </div>
@@ -109,6 +110,16 @@
     </div>
     <p class="note" id="iosNote" hidden>iPhone/iPad: tekan butang Kongsi, kemudian "Tambah ke Skrin Utama".</p>
     <button id="mClose" class="primary">Tutup</button>
+  </div>
+</section>
+
+<!-- PETA -->
+<section id="map" class="overlay" hidden>
+  <div class="card wide">
+    <h2>Peta Dunia</h2>
+    <svg id="mapSvg" viewBox="0 0 400 300" role="img" aria-label="Peta kampung dan zon"></svg>
+    <div id="mapInfo" class="body"></div>
+    <button id="mapClose" class="link">Tutup</button>
   </div>
 </section>
 
